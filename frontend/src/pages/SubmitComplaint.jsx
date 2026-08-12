@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { complaintsAPI } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -16,6 +16,8 @@ const PRIORITY_COLORS = { High: '#dc2626', Medium: '#d97706', Low: '#16a34a' }
 const PRIORITY_BG = { High: '#fef2f2', Medium: '#fffbeb', Low: '#f0fdf4' }
 
 function AICategoryChip({ preview, loading }) {
+  const [showWhy, setShowWhy] = useState(false)
+
   if (loading) return (
     <div className="ai-chip" style={{ marginTop: 10 }}>
       <Loader2 size={16} color="#4f46e5" className="spin" />
@@ -23,18 +25,51 @@ function AICategoryChip({ preview, loading }) {
     </div>
   )
   if (!preview) return null
+
+  const conf = preview.confidence
+  let confColor = '#ef4444' // red
+  if (conf >= 80) confColor = '#10b981' // green
+  else if (conf >= 60) confColor = '#f59e0b' // yellow
+
   return (
-    <motion.div className="ai-chip" initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} style={{ marginTop: 10 }}>
-      <Sparkles size={16} color="#4f46e5" />
-      <div style={{ flex: 1, fontSize: 13 }}>
-        <span style={{ color: '#64748b' }}>AI Detected: </span>
-        <strong style={{ color: '#4f46e5' }}>{preview.category}</strong>
-        <span style={{ color: '#94a3b8' }}> · {preview.confidence}% confidence</span>
-        <span style={{ marginLeft: 10, fontWeight: 700, color: PRIORITY_COLORS[preview.priority] }}>
-          ● {preview.priority} Priority
-        </span>
+    <motion.div className="ai-chip" initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} style={{ marginTop: 10, display: 'block', padding: '12px 16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <Sparkles size={16} color="#4f46e5" style={{ flexShrink: 0 }} />
+        <div style={{ flex: 1, fontSize: 13, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <span>
+            <span style={{ color: '#64748b' }}>AI Detected: </span>
+            <strong style={{ color: '#4f46e5' }}>{preview.category}</strong>
+          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'white', padding: '2px 8px', borderRadius: 12, border: '1px solid #e2e8f0' }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: '#64748b' }}>Confidence:</span>
+            <div style={{ width: 40, height: 6, background: '#e2e8f0', borderRadius: 4, overflow: 'hidden' }}>
+              <div style={{ width: `${conf}%`, height: '100%', background: confColor, transition: 'width 0.3s ease' }} />
+            </div>
+          </div>
+          <span style={{ fontWeight: 700, color: PRIORITY_COLORS[preview.priority] }}>
+            ● {preview.priority} Priority
+          </span>
+          <button type="button" onClick={() => setShowWhy(!showWhy)} style={{ border: 'none', background: 'none', color: '#4f46e5', fontSize: 12, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>
+            ⓘ Why?
+          </button>
+        </div>
+        <span style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>→ {preview.department}</span>
       </div>
-      <span style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>→ {preview.department}</span>
+
+      <AnimatePresence>
+        {showWhy && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: 'hidden' }}>
+            <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid #c7d2fe', fontSize: 12, color: '#475569' }}>
+              <strong>AI Reasoning:</strong> {preview.priority_reason}
+              {preview.keywords?.length > 0 && (
+                <div style={{ marginTop: 6 }}>
+                  <strong>Matched Keywords:</strong> {preview.keywords.join(', ')}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   )
 }
@@ -123,9 +158,11 @@ function DuplicateModal({ similar, onUpvote, onProceed, onClose }) {
 export default function SubmitComplaint() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const urlBlock = searchParams.get('block')
   const [text, setText] = useState('')
   const [category, setCategory] = useState('')
-  const [block, setBlock] = useState('')
+  const [block, setBlock] = useState(urlBlock || '')
   const [floor, setFloor] = useState('')
   const [room, setRoom] = useState('')
   const [isAnon, setIsAnon] = useState(false)
@@ -308,10 +345,11 @@ export default function SubmitComplaint() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
                 <div>
                   <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 4, fontWeight: 500 }}>Block / Area</div>
-                  <select className="input-field" value={block} onChange={(e) => setBlock(e.target.value)}>
+                  <select className="input-field" value={block} onChange={(e) => setBlock(e.target.value)} disabled={!!urlBlock} style={{ background: urlBlock ? '#f1f5f9' : 'white' }}>
                     <option value="">Select Block</option>
                     {BLOCKS.map(b => <option key={b}>{b}</option>)}
                   </select>
+                  {urlBlock && <div style={{ fontSize: 11, color: '#10b981', marginTop: 4, fontWeight: 600 }}>✓ Scanned from QR</div>}
                 </div>
                 <div>
                   <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 4, fontWeight: 500 }}>Floor</div>

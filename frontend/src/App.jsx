@@ -10,6 +10,7 @@ import StudentLogin from './pages/StudentLogin'
 import AdminDashboard from './pages/AdminDashboard'
 import ComplaintDetail from './pages/ComplaintDetail'
 import Analytics from './pages/Analytics'
+import QRCodes from './pages/QRCodes'
 
 export default function App() {
   return (
@@ -39,6 +40,7 @@ export default function App() {
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/complaint/:id" element={<ComplaintDetail />} />
           <Route path="/admin/analytics" element={<Analytics />} />
+          <Route path="/admin/qrcodes" element={<QRCodes />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

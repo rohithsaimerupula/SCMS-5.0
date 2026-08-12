@@ -14,7 +14,7 @@ import {
 const STATUSES = ['Submitted', 'In Review', 'Assigned', 'In Progress', 'Resolved']
 const PRIORITY_COLORS = { High: '#dc2626', Medium: '#d97706', Low: '#16a34a' }
 const STATUS_DOT = { 'Submitted': '#94a3b8', 'In Review': '#4f46e5', 'Assigned': '#0f766e', 'In Progress': '#b45309', 'Resolved': '#16a34a', 'Closed': '#94a3b8' }
-const SLA_HOURS = { High: 24, Medium: 72, Low: 168 }
+const SLA_HOURS = { High: 4, Medium: 24, Low: 72 }
 
 function isSlaBreached(c) {
   if (c.status === 'Resolved' || c.status === 'Closed') return false
@@ -34,9 +34,17 @@ function KanbanCard({ complaint, onClick }) {
   return (
     <div
       className={breached ? 'kanban-card sla-alert' : 'kanban-card'}
+      style={breached ? { borderColor: '#ef4444', background: '#fef2f2', boxShadow: '0 0 0 1px #ef4444' } : {}}
       onClick={() => onClick(complaint.id)}
     >
-      {breached && <div style={{ fontSize: 11, color: '#dc2626', fontWeight: 700, marginBottom: 6 }}>⚠️ SLA BREACHED</div>}
+      {breached && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444', animation: 'pulse 2s infinite' }} />
+          <span style={{ fontSize: 11, color: '#dc2626', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Escalated: Notify HOD
+          </span>
+        </div>
+      )}
       <div style={{ fontSize: 13, color: '#1e293b', marginBottom: 10, lineHeight: 1.5 }}>
         {complaint.text.slice(0, 85)}{complaint.text.length > 85 ? '…' : ''}
       </div>
@@ -179,6 +187,9 @@ export default function AdminDashboard() {
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center' }}>
           <div style={{ fontSize: 13, color: '#64748b' }}>{user.name}</div>
           <span className="badge badge-ai" style={{ marginRight: 4 }}>{user.role}</span>
+          <button onClick={() => navigate('/admin/qrcodes')} className="btn-secondary" style={{ padding: '8px 14px', fontSize: 13 }}>
+            <Zap size={14} /> QR Stations
+          </button>
           <button onClick={() => navigate('/admin/analytics')} className="btn-secondary" style={{ padding: '8px 14px', fontSize: 13 }}>
             <BarChart3 size={14} /> Analytics
           </button>

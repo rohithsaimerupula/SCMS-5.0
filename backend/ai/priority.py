@@ -36,11 +36,24 @@ CATEGORY_DEFAULT_PRIORITY = {
     "Other": "Low",
 }
 
+# Sentiment keywords indicating frustration
+SENTIMENT_KEYWORDS = [
+    "angry", "frustrated", "fed up", "ridiculous", "pathetic", "unacceptable",
+    "third time", "again and again", "not fixed yet", "worst", "terrible",
+    "how many times", "ignored", "no action"
+]
+
 def score_priority(text: str, category: str = "Other", upvote_count: int = 1, hours_open: float = 0) -> Tuple[str, str]:
     """
     Returns (priority: High|Medium|Low, reason: str)
     """
     text_lower = text.lower()
+
+    # --- Sentiment layer (Feature 4) ---
+    matched_sentiment = [kw for kw in SENTIMENT_KEYWORDS if kw in text_lower]
+    if matched_sentiment:
+        reason = f"High priority: detected strong student frustration/anger ('{matched_sentiment[0]}')."
+        return _escalate("High", upvote_count, hours_open, reason)
 
     # --- Rule layer: check high-severity keywords ---
     matched_high = [kw for kw in HIGH_KEYWORDS if kw in text_lower]
