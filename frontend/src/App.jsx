@@ -15,40 +15,49 @@ import QRCodes from './pages/QRCodes'
 import ChatSubmit from './pages/ChatSubmit'
 import CampusHeatmap from './pages/CampusHeatmap'
 
+import Splash from './pages/Splash'
+import BrandingFooter from './components/BrandingFooter'
+
 export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            style: {
-              background: '#1c1c28',
-              color: '#f1f5f9',
-              border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '12px',
-              fontSize: '14px',
-            },
-            success: { iconTheme: { primary: '#10b981', secondary: '#fff' } },
-            error: { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
-          }}
-        />
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/submit" element={<SubmitComplaint />} />
-          <Route path="/submit/chat" element={<ChatSubmit />} />
-          <Route path="/submit/success" element={<SubmitSuccess />} />
-          <Route path="/track" element={<TrackComplaint />} />
-          <Route path="/login/student" element={<StudentLogin />} />
-          <Route path="/student/dashboard" element={<StudentDashboard />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/complaint/:id" element={<ComplaintDetail />} />
-          <Route path="/admin/analytics" element={<Analytics />} />
-          <Route path="/admin/qrcodes" element={<QRCodes />} />
-          <Route path="/admin/heatmap" element={<CampusHeatmap />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+          <div style={{ flex: 1 }}>
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                style: {
+                  background: '#1c1c28',
+                  color: '#f1f5f9',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '12px',
+                  fontSize: '14px',
+                },
+                success: { iconTheme: { primary: '#10b981', secondary: '#fff' } },
+                error: { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
+              }}
+            />
+            <Routes>
+              <Route path="/" element={<Splash />} />
+              <Route path="/login" element={<Landing />} />
+              <Route path="/submit" element={<SubmitComplaint />} />
+              <Route path="/submit/chat" element={<ChatSubmit />} />
+              <Route path="/submit/success" element={<SubmitSuccess />} />
+              <Route path="/track" element={<TrackComplaint />} />
+              <Route path="/login/student" element={<StudentLogin />} />
+              <Route path="/student/dashboard" element={<StudentDashboard />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/complaint/:id" element={<ComplaintDetail />} />
+              <Route path="/admin/analytics" element={<Analytics />} />
+              <Route path="/admin/qrcodes" element={<QRCodes />} />
+              <Route path="/admin/heatmap" element={<CampusHeatmap />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </div>
+          <BrandingFooter />
+        </div>
       </BrowserRouter>
     </AuthProvider>
   )

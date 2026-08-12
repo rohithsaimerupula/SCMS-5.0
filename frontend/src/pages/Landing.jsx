@@ -258,10 +258,6 @@ export default function Landing() {
         </motion.div>
       </div>
 
-      {/* Footer */}
-      <div style={{ textAlign: 'center', padding: '20px 40px', borderTop: '1px solid #e2e8f0', color: '#94a3b8', fontSize: 13 }}>
-        SCMS — Built for HACKMATRIX 1.0 | AI & Data Science Department
-      </div>
     </div>
   )
 }
