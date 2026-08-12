@@ -6,6 +6,7 @@ import SubmitComplaint from './pages/SubmitComplaint'
 import SubmitSuccess from './pages/SubmitSuccess'
 import TrackComplaint from './pages/TrackComplaint'
 import AdminLogin from './pages/AdminLogin'
+import StudentLogin from './pages/StudentLogin'
 import AdminDashboard from './pages/AdminDashboard'
 import ComplaintDetail from './pages/ComplaintDetail'
 import Analytics from './pages/Analytics'
@@ -33,6 +34,7 @@ export default function App() {
           <Route path="/submit" element={<SubmitComplaint />} />
           <Route path="/submit/success" element={<SubmitSuccess />} />
           <Route path="/track" element={<TrackComplaint />} />
+          <Route path="/login/student" element={<StudentLogin />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/complaint/:id" element={<ComplaintDetail />} />

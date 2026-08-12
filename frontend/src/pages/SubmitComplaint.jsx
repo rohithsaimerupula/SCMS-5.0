@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import {
   Brain, Upload, X, CheckCircle, AlertTriangle, Loader2,
-  MapPin, Eye, EyeOff, ArrowRight, Users, Sparkles, ChevronRight
+  MapPin, Eye, EyeOff, ArrowRight, Users, Sparkles, ChevronRight, Mic
 } from 'lucide-react'
 
 const CATEGORIES = ['Wi-Fi', 'Classroom', 'Laboratory', 'Hostel', 'Transport', 'Washroom', 'Electrical', 'Other']
@@ -137,8 +137,50 @@ export default function SubmitComplaint() {
   const [similar, setSimilar] = useState([])
   const [showModal, setShowModal] = useState(false)
   const [dragOver, setDragOver] = useState(false)
+  const [isRecording, setIsRecording] = useState(false)
   const fileRef = useRef(null)
   const debounceRef = useRef(null)
+
+  const startRecording = useCallback(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SpeechRecognition) {
+      toast.error('Voice input is not supported in this browser.')
+      return
+    }
+    const recognition = new SpeechRecognition()
+    recognition.continuous = true
+    recognition.interimResults = true
+    recognition.lang = 'en-US'
+
+    recognition.onstart = () => setIsRecording(true)
+    
+    recognition.onresult = (event) => {
+      let finalTranscript = ''
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript
+        }
+      }
+      if (finalTranscript) {
+        setText((prev) => prev + (prev.endsWith(' ') || prev.length === 0 ? '' : ' ') + finalTranscript)
+      }
+    }
+
+    recognition.onerror = (event) => {
+      console.error(event.error)
+      setIsRecording(false)
+      toast.error('Voice recognition failed')
+    }
+
+    recognition.onend = () => setIsRecording(false)
+
+    recognition.start()
+    
+    // Auto-stop after 10 seconds of silence/speaking
+    setTimeout(() => {
+      recognition.stop()
+    }, 10000)
+  }, [])
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
@@ -221,9 +263,27 @@ export default function SubmitComplaint() {
           <form onSubmit={handlePreSubmit}>
             {/* Complaint text */}
             <div className="card" style={{ padding: 24, marginBottom: 20 }}>
-              <label className="form-label">
-                What's the issue? <span style={{ color: '#ef4444' }}>*</span>
-              </label>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                <label className="form-label" style={{ margin: 0 }}>
+                  What's the issue? <span style={{ color: '#ef4444' }}>*</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={startRecording}
+                  disabled={isRecording}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px',
+                    borderRadius: 20, border: 'none', fontSize: 13, fontWeight: 600,
+                    background: isRecording ? '#fee2e2' : '#eef2ff',
+                    color: isRecording ? '#ef4444' : '#4f46e5',
+                    cursor: isRecording ? 'default' : 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  {isRecording ? <Loader2 size={14} className="spin" /> : <Mic size={14} />}
+                  {isRecording ? 'Listening...' : 'Speak Issue'}
+                </button>
+              </div>
               <textarea
                 className="input-field"
                 placeholder='Describe the problem in detail — e.g. "AC not working in CSE Lab 2, it is extremely hot and students cannot concentrate..."'

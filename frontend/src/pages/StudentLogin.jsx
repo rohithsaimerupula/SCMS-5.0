@@ -3,14 +3,13 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
-import { Brain, Lock, Eye, EyeOff, Loader2, Zap } from 'lucide-react'
+import { Brain, Lock, Eye, EyeOff, Loader2, Zap, Users } from 'lucide-react'
 
 const QUICK_USERS = [
-  { label: '👑 Super Admin', email: 'admin@vignan.ac.in', password: 'demo1234' },
-  { label: '💻 IT Admin', email: 'it.admin@vignan.ac.in', password: 'demo1234' },
+  { label: '🎓 Student Demo', email: 'student@vignan.ac.in', password: 'demo1234' },
 ]
 
-export default function AdminLogin() {
+export default function StudentLogin() {
   const { login } = useAuth()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
@@ -23,9 +22,9 @@ export default function AdminLogin() {
     const result = await login(email, password)
     setLoading(false)
     if (result.success) {
-      if (result.user.role === 'student') { toast.error('Student accounts cannot access the admin portal.'); return }
+      if (result.user.role !== 'student') { toast.error('This portal is for students only.'); return }
       toast.success(`Welcome, ${result.user.name}!`)
-      navigate('/admin/dashboard')
+      navigate('/track')
     } else {
       toast.error(result.error)
     }
@@ -35,7 +34,7 @@ export default function AdminLogin() {
     setLoading(true)
     const result = await login(e, p)
     setLoading(false)
-    if (result.success) { toast.success(`Welcome, ${result.user.name}!`); navigate('/admin/dashboard') }
+    if (result.success) { toast.success(`Welcome, ${result.user.name}!`); navigate('/track') }
     else toast.error(result.error)
   }
 
@@ -56,9 +55,9 @@ export default function AdminLogin() {
         <div className="card" style={{ padding: 40 }}>
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
             <div style={{ width: 64, height: 64, background: 'linear-gradient(135deg, #4f46e5, #0ea5e9)', borderRadius: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: '0 8px 24px rgba(79,70,229,0.3)' }}>
-              <Brain size={32} color="white" />
+              <Users size={32} color="white" />
             </div>
-            <h1 style={{ fontSize: 24, fontWeight: 800, color: '#0f172a', marginBottom: 6 }}>Admin Portal</h1>
+            <h1 style={{ fontSize: 24, fontWeight: 800, color: '#0f172a', marginBottom: 6 }}>Student Login</h1>
             <p style={{ color: '#64748b', fontSize: 14, margin: 0 }}>Smart Complaint Management System</p>
           </div>
 
@@ -68,7 +67,7 @@ export default function AdminLogin() {
               <input
                 className="input-field"
                 type="email"
-                placeholder="admin@scms.edu"
+                placeholder="student@vignan.ac.in"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -94,7 +93,7 @@ export default function AdminLogin() {
               </div>
             </div>
             <button className="btn-primary" type="submit" disabled={loading} style={{ width: '100%', justifyContent: 'center', padding: '13px', fontSize: 15, borderRadius: 11 }}>
-              {loading ? <Loader2 size={17} className="spin" /> : <><Lock size={15} /> Sign In to Dashboard</>}
+              {loading ? <Loader2 size={17} className="spin" /> : <><Lock size={15} /> Sign In</>}
             </button>
           </form>
 

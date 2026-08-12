@@ -92,32 +92,51 @@ export default function Landing() {
         <div className="hero-blob" style={{ width: 500, height: 500, background: 'rgba(79,70,229,0.12)', top: -200, left: -100 }} />
         <div className="hero-blob" style={{ width: 400, height: 400, background: 'rgba(14,165,233,0.1)', top: -100, right: -80 }} />
 
-        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} style={{ position: 'relative' }}>
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 16px',
-            background: '#eef2ff', border: '1px solid #c7d2fe',
-            borderRadius: 20, marginBottom: 28, fontSize: 13, color: '#4338ca', fontWeight: 600
-          }}>
-            <Star size={13} fill="#4338ca" /> HACKMATRIX 1.0 — AI & Data Science
-          </div>
-
-          <h1 style={{ fontSize: 'clamp(36px, 5.5vw, 68px)', fontWeight: 900, lineHeight: 1.08, margin: '0 0 20px', color: '#0f172a' }}>
-            Campus Complaints,{' '}
-            <span className="gradient-text">Solved by AI</span>
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} style={{ position: 'relative', maxWidth: 1000, margin: '0 auto' }}>
+          
+          <h1 style={{ fontSize: 'clamp(36px, 5.5vw, 56px)', fontWeight: 900, lineHeight: 1.1, margin: '0 0 16px', color: '#0f172a' }}>
+            Smart Complaint Management System
           </h1>
 
-          <p style={{ fontSize: 18, color: '#64748b', maxWidth: 560, margin: '0 auto 40px', lineHeight: 1.7, fontWeight: 400 }}>
-            Stop losing complaints in WhatsApp groups. SCMS uses real ML to categorize,
-            prioritize, deduplicate and route every complaint — automatically.
+          <p style={{ fontSize: 18, color: '#64748b', maxWidth: 560, margin: '0 auto 48px', lineHeight: 1.7, fontWeight: 500 }}>
+            Report it. Track it. Get it resolved.
           </p>
 
-          <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button onClick={() => navigate('/submit')} className="btn-primary" style={{ padding: '14px 32px', fontSize: 16, borderRadius: 12 }}>
-              Report an Issue <ArrowRight size={18} />
-            </button>
-            <button onClick={() => navigate('/track')} className="btn-secondary" style={{ padding: '14px 32px', fontSize: 16, borderRadius: 12 }}>
-              <Clock size={18} /> Track Complaint
-            </button>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24, padding: '0 20px', marginBottom: 20 }}>
+            
+            {/* Student Login Card */}
+            <div className="card" style={{ padding: 40, textAlign: 'center', background: 'white', display: 'flex', flexDirection: 'column', height: '100%' }}>
+              <div style={{ width: 64, height: 64, borderRadius: 20, background: '#eef2ff', color: '#4f46e5', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+                <Users size={32} />
+              </div>
+              <h2 style={{ fontSize: 24, fontWeight: 800, color: '#0f172a', marginBottom: 12 }}>Student Login</h2>
+              <p style={{ color: '#64748b', fontSize: 15, lineHeight: 1.6, marginBottom: 32, flexGrow: 1 }}>
+                Report & track your campus complaints. Upload photos and get real-time AI updates.
+              </p>
+              <button onClick={() => navigate('/login/student')} className="btn-primary" style={{ padding: '14px 0', fontSize: 16, borderRadius: 12, width: '100%', background: '#4f46e5' }}>
+                Login as Student
+              </button>
+              <div style={{ marginTop: 16 }}>
+                <Link to="/submit" style={{ fontSize: 14, color: '#64748b', textDecoration: 'underline' }}>
+                  Continue as Guest / Anonymous
+                </Link>
+              </div>
+            </div>
+
+            {/* Admin Login Card */}
+            <div className="card" style={{ padding: 40, textAlign: 'center', background: 'white', display: 'flex', flexDirection: 'column', height: '100%' }}>
+              <div style={{ width: 64, height: 64, borderRadius: 20, background: '#f8fafc', color: '#334155', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+                <Shield size={32} />
+              </div>
+              <h2 style={{ fontSize: 24, fontWeight: 800, color: '#0f172a', marginBottom: 12 }}>Admin Login</h2>
+              <p style={{ color: '#64748b', fontSize: 15, lineHeight: 1.6, marginBottom: 32, flexGrow: 1 }}>
+                Manage & resolve department complaints. View AI analytics and campus hotspots.
+              </p>
+              <button onClick={() => navigate('/admin/login')} className="btn-primary" style={{ padding: '14px 0', fontSize: 16, borderRadius: 12, width: '100%', background: '#334155' }}>
+                Login as Admin
+              </button>
+            </div>
+
           </div>
         </motion.div>
 
@@ -126,12 +145,14 @@ export default function Landing() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap', marginTop: 52 }}
+          style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap', marginTop: 32, position: 'relative' }}
         >
-          <StatCard label="Total Complaints" value={stats.total} color="#4f46e5" icon={MessageSquare} />
-          <StatCard label="Open Issues" value={stats.open} color="#d97706" icon={Clock} />
-          <StatCard label="Resolved" value={stats.resolved} color="#16a34a" icon={CheckCircle} />
-          <StatCard label="Avg Resolution" value={stats.avg_resolution_hours ? `${Math.round(stats.avg_resolution_hours)}h` : null} color="#0369a1" icon={Activity} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'rgba(255,255,255,0.8)', padding: '12px 24px', borderRadius: 30, boxShadow: '0 4px 12px rgba(0,0,0,0.05)', backdropFilter: 'blur(10px)', border: '1px solid rgba(0,0,0,0.05)' }}>
+             <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981', boxShadow: '0 0 10px #10b981' }} />
+             <span style={{ fontSize: 15, fontWeight: 600, color: '#334155' }}>
+               <strong style={{ color: '#10b981' }}>{stats.resolved ?? 0}</strong> complaints resolved this month
+             </span>
+          </div>
         </motion.div>
       </div>
 
