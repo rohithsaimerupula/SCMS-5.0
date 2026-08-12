@@ -8,7 +8,7 @@ import { format } from 'date-fns'
 import {
   Brain, LayoutGrid, Table2, Search, RefreshCw,
   AlertTriangle, Clock, CheckCircle, Loader2, ChevronRight,
-  LogOut, BarChart3, MessageSquare, Zap, Download
+  LogOut, BarChart3, MessageSquare, Zap, Download, Map
 } from 'lucide-react'
 
 const STATUSES = ['Submitted', 'In Review', 'Assigned', 'In Progress', 'Resolved']
@@ -229,6 +229,9 @@ export default function AdminDashboard() {
           </button>
           <button onClick={() => navigate('/admin/analytics')} className="btn-secondary" style={{ padding: '8px 14px', fontSize: 13 }}>
             <BarChart3 size={14} /> Analytics
+          </button>
+          <button onClick={() => navigate('/admin/heatmap')} className="btn-secondary" style={{ padding: '8px 14px', fontSize: 13 }}>
+            <Map size={14} /> Campus Map
           </button>
           <button onClick={() => { logout(); navigate('/admin/login') }} className="btn-ghost" style={{ padding: '8px 12px', fontSize: 13 }}>
             <LogOut size={14} /> Logout

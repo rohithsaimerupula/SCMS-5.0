@@ -165,9 +165,32 @@ async def submit_complaint(
 
     # Department lookup
     dept_name = routing["department"].split("—")[0].strip()
-    dept = db.query(models.Department).filter(
-        models.Department.name.ilike(f"%{dept_name}%")
-    ).first()
+    
+    # Predictive Load Balancer for boundary cases (e.g. Classroom issues might be IT or Academic)
+    if final_category in ["Classroom", "Laboratory", "Other"]:
+        candidate_depts = ["IT Services", "Electrical Maintenance", "Administration", dept_name]
+        depts = db.query(models.Department).filter(
+            models.Department.name.in_(candidate_depts)
+        ).all()
+        
+        # Calculate active load for each department
+        lowest_load = float('inf')
+        best_dept = None
+        for d in depts:
+            load = db.query(models.Complaint).filter(
+                models.Complaint.department_id == d.id,
+                models.Complaint.status.notin_(["Resolved", "Closed"])
+            ).count()
+            if load < lowest_load:
+                lowest_load = load
+                best_dept = d
+                
+        if best_dept:
+            dept = best_dept
+        else:
+            dept = db.query(models.Department).filter(models.Department.name.ilike(f"%{dept_name}%")).first()
+    else:
+        dept = db.query(models.Department).filter(models.Department.name.ilike(f"%{dept_name}%")).first()
 
     # Photo upload
     photo_url = None

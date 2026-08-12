@@ -13,6 +13,7 @@ import ComplaintDetail from './pages/ComplaintDetail'
 import Analytics from './pages/Analytics'
 import QRCodes from './pages/QRCodes'
 import ChatSubmit from './pages/ChatSubmit'
+import CampusHeatmap from './pages/CampusHeatmap'
 
 export default function App() {
   return (
@@ -45,6 +46,7 @@ export default function App() {
           <Route path="/admin/complaint/:id" element={<ComplaintDetail />} />
           <Route path="/admin/analytics" element={<Analytics />} />
           <Route path="/admin/qrcodes" element={<QRCodes />} />
+          <Route path="/admin/heatmap" element={<CampusHeatmap />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
