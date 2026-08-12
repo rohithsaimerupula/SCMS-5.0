@@ -5,10 +5,22 @@ import os
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./scms.db")
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+elif DATABASE_URL.startswith("libsql://") and not DATABASE_URL.startswith("sqlite+libsql://"):
+    # SQLAlchemy requires sqlite+libsql:// for the Turso dialect
+    DATABASE_URL = DATABASE_URL.replace("libsql://", "sqlite+libsql://", 1)
+
+connect_args = {}
+if "sqlite" in DATABASE_URL and not "libsql" in DATABASE_URL:
+    connect_args["check_same_thread"] = False
+
+# Support Turso Auth Token if provided
+TURSO_AUTH_TOKEN = os.getenv("TURSO_AUTH_TOKEN")
+if TURSO_AUTH_TOKEN:
+    connect_args["authToken"] = TURSO_AUTH_TOKEN
 
 engine = create_engine(
     DATABASE_URL,
-    connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {},
+    connect_args=connect_args,
     echo=False,
 )
 
