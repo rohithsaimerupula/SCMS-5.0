@@ -7,10 +7,12 @@ import SubmitSuccess from './pages/SubmitSuccess'
 import TrackComplaint from './pages/TrackComplaint'
 import AdminLogin from './pages/AdminLogin'
 import StudentLogin from './pages/StudentLogin'
+import StudentDashboard from './pages/StudentDashboard'
 import AdminDashboard from './pages/AdminDashboard'
 import ComplaintDetail from './pages/ComplaintDetail'
 import Analytics from './pages/Analytics'
 import QRCodes from './pages/QRCodes'
+import ChatSubmit from './pages/ChatSubmit'
 
 export default function App() {
   return (
@@ -33,9 +35,11 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/submit" element={<SubmitComplaint />} />
+          <Route path="/submit/chat" element={<ChatSubmit />} />
           <Route path="/submit/success" element={<SubmitSuccess />} />
           <Route path="/track" element={<TrackComplaint />} />
           <Route path="/login/student" element={<StudentLogin />} />
+          <Route path="/student/dashboard" element={<StudentDashboard />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/complaint/:id" element={<ComplaintDetail />} />

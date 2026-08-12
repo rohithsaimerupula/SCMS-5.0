@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import {
-  Brain, Upload, X, CheckCircle, AlertTriangle, Loader2,
+  Brain, Upload, X, CheckCircle, AlertTriangle, Loader2, Bot,
   MapPin, Eye, EyeOff, ArrowRight, Users, Sparkles, ChevronRight, Mic
 } from 'lucide-react'
 
@@ -160,7 +160,7 @@ export default function SubmitComplaint() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const urlBlock = searchParams.get('block')
-  const [text, setText] = useState('')
+  const [text, setText] = useState(() => localStorage.getItem('complaintDraft') || '')
   const [category, setCategory] = useState('')
   const [block, setBlock] = useState(urlBlock || '')
   const [floor, setFloor] = useState('')
@@ -177,6 +177,10 @@ export default function SubmitComplaint() {
   const [isRecording, setIsRecording] = useState(false)
   const fileRef = useRef(null)
   const debounceRef = useRef(null)
+
+  useEffect(() => {
+    localStorage.setItem('complaintDraft', text)
+  }, [text])
 
   const startRecording = useCallback(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
@@ -268,6 +272,7 @@ export default function SubmitComplaint() {
       fd.append('is_anonymous', isAnon)
       if (photo) fd.append('photo', photo)
       const res = await complaintsAPI.submit(fd)
+      localStorage.removeItem('complaintDraft')
       navigate('/submit/success', { state: { complaint: res.data } })
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Submission failed')
@@ -292,10 +297,21 @@ export default function SubmitComplaint() {
 
       <div style={{ maxWidth: 740, margin: '0 auto', padding: '40px 24px' }}>
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 style={{ fontSize: 26, fontWeight: 800, color: '#0f172a', marginBottom: 6 }}>Describe Your Issue</h1>
-          <p style={{ color: '#64748b', marginBottom: 32, fontSize: 14 }}>
-            AI will auto-detect the category, priority and route it to the right department.
-          </p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
+            <div>
+              <h1 style={{ fontSize: 26, fontWeight: 800, color: '#0f172a', marginBottom: 6 }}>Describe Your Issue</h1>
+              <p style={{ color: '#64748b', margin: 0, fontSize: 14 }}>
+                AI will auto-detect the category, priority and route it to the right department.
+              </p>
+            </div>
+            <button
+              onClick={() => navigate('/submit/chat')}
+              className="btn-secondary"
+              style={{ padding: '8px 16px', background: 'linear-gradient(135deg, #f5f3ff, #eef2ff)', borderColor: '#c7d2fe', color: '#4f46e5' }}
+            >
+              <Bot size={16} /> Try AI Chat Mode
+            </button>
+          </div>
 
           <form onSubmit={handlePreSubmit}>
             {/* Complaint text */}

@@ -12,15 +12,27 @@ from backend.ai.priority import score_priority, get_resolution_estimate
 from backend.ai.router import route
 from backend.ai.deduplicator import find_similar, embedding_to_str
 
+from deep_translator import GoogleTranslator
+
 router = APIRouter(prefix="/api/complaints", tags=["complaints"])
 
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
-
+translator = GoogleTranslator(source='auto', target='en')
 
 def _generate_complaint_id(db: Session) -> str:
     count = db.query(models.Complaint).count()
     return f"SCMS-{datetime.utcnow().year}-{str(count + 1000).zfill(4)}"
+
+
+def _translate_to_english(text: str) -> str:
+    try:
+        # deep_translator will auto-detect and translate to english
+        res = translator.translate(text)
+        if res: return res
+    except Exception:
+        pass
+    return text
 
 
 # ─── AI Preview (live chip while typing) ─────────────────────────────────────
@@ -31,8 +43,10 @@ def ai_preview(req: schemas.AIPreviewRequest):
     if len(req.text.strip()) < 10:
         raise HTTPException(status_code=422, detail="Text too short for analysis")
 
-    category, confidence, keywords = classify(req.text)
-    priority, priority_reason = score_priority(req.text, category)
+    translated_text = _translate_to_english(req.text)
+    
+    category, confidence, keywords = classify(translated_text)
+    priority, priority_reason = score_priority(translated_text, category)
     routing = route(category)
 
     return schemas.AIPreviewResponse(
@@ -135,16 +149,18 @@ async def submit_complaint(
     db: Session = Depends(get_db),
     current_user: Optional[models.User] = Depends(get_current_user),
 ):
+    translated_text = _translate_to_english(text)
+
     # AI pipeline
-    ai_category, confidence, _ = classify(text)
+    ai_category, confidence, _ = classify(translated_text)
     final_category = category_override if category_override else ai_category
     category_overridden = bool(category_override and category_override != ai_category)
 
-    priority, priority_reason = score_priority(text, final_category)
+    priority, priority_reason = score_priority(translated_text, final_category)
     routing = route(final_category, location_block)
 
     # Embedding
-    emb = embed_text(text)
+    emb = embed_text(translated_text)
     emb_str = embedding_to_str(emb)
 
     # Department lookup

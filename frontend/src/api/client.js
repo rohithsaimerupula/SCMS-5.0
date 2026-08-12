@@ -34,6 +34,11 @@ export const authAPI = {
   register: (data) => api.post('/auth/register', data),
 }
 
+// ─── Student ──────────────────────────────────────────────────────────────────
+export const studentAPI = {
+  myComplaints: () => api.get('/complaints/my'),
+}
+
 // ─── Complaints ───────────────────────────────────────────────────────────────
 export const complaintsAPI = {
   aiPreview: (text) => api.post('/complaints/ai-preview', { text }),
@@ -43,7 +48,6 @@ export const complaintsAPI = {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
   track: (complaintId) => api.get(`/complaints/track/${complaintId}`),
-  myComplaints: () => api.get('/complaints/my'),
   list: (params) => api.get('/complaints/', { params }),
   upvote: (id) => api.post(`/complaints/${id}/upvote`),
   feedback: (id, data) => api.post(`/complaints/${id}/feedback`, data),

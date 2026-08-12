@@ -24,7 +24,7 @@ export default function StudentLogin() {
     if (result.success) {
       if (result.user.role !== 'student') { toast.error('This portal is for students only.'); return }
       toast.success(`Welcome, ${result.user.name}!`)
-      navigate('/track')
+      navigate('/student/dashboard')
     } else {
       toast.error(result.error)
     }
