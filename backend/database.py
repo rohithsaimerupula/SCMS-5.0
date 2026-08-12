@@ -15,8 +15,9 @@ if "sqlite" in DATABASE_URL and not "libsql" in DATABASE_URL:
 
 # Support Turso Auth Token if provided
 TURSO_AUTH_TOKEN = os.getenv("TURSO_AUTH_TOKEN")
-if TURSO_AUTH_TOKEN:
-    connect_args["auth_token"] = TURSO_AUTH_TOKEN
+if TURSO_AUTH_TOKEN and "libsql" in DATABASE_URL:
+    separator = "&" if "?" in DATABASE_URL else "?"
+    DATABASE_URL += f"{separator}authToken={TURSO_AUTH_TOKEN}"
 
 engine = create_engine(
     DATABASE_URL,
