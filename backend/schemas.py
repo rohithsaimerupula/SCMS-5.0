@@ -55,6 +55,12 @@ class LogOut(BaseModel):
     timestamp: datetime
     model_config = {"from_attributes": True}
 
+class FeedbackOut(BaseModel):
+    satisfied_bool: bool
+    comment: Optional[str]
+    created_at: datetime
+    model_config = {"from_attributes": True}
+
 class ComplaintOut(BaseModel):
     id: int
     complaint_id: str
@@ -80,6 +86,7 @@ class ComplaintOut(BaseModel):
     updated_at: datetime
     resolved_at: Optional[datetime] = None
     logs: List[LogOut] = []
+    feedback: Optional[FeedbackOut] = None
     model_config = {"from_attributes": True}
 
 class SimilarComplaint(BaseModel):

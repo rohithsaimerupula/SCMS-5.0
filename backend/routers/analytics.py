@@ -32,6 +32,12 @@ def analytics_overview(db: Session = Depends(get_db)):
     else:
         avg_resolution = 0
 
+    # Feedback satisfaction rate
+    all_feedback = db.query(models.Feedback).all()
+    feedback_total = len(all_feedback)
+    feedback_satisfied = sum(1 for f in all_feedback if f.satisfied_bool)
+    satisfaction_score = round((feedback_satisfied / max(feedback_total, 1)) * 100, 1) if feedback_total > 0 else None
+
     return {
         "total": total,
         "open": open_c,
@@ -39,6 +45,8 @@ def analytics_overview(db: Session = Depends(get_db)):
         "high_priority": high,
         "avg_resolution_hours": avg_resolution,
         "resolution_rate": round((resolved / max(total, 1)) * 100, 1),
+        "satisfaction_score": satisfaction_score,
+        "feedback_count": feedback_total
     }
 
 

@@ -8,7 +8,7 @@ import { format } from 'date-fns'
 import {
   Brain, LayoutGrid, Table2, Search, RefreshCw,
   AlertTriangle, Clock, CheckCircle, Loader2, ChevronRight,
-  LogOut, BarChart3, MessageSquare, Zap
+  LogOut, BarChart3, MessageSquare, Zap, Download
 } from 'lucide-react'
 
 const STATUSES = ['Submitted', 'In Review', 'Assigned', 'In Progress', 'Resolved']
@@ -169,6 +169,38 @@ export default function AdminDashboard() {
     return () => clearTimeout(t)
   }, [filters])
 
+  const exportCSV = () => {
+    if (complaints.length === 0) return toast.error('No data to export')
+    
+    const headers = ['ID', 'Description', 'Category', 'Priority', 'Status', 'Location Block', 'Submitted At', 'Resolved At']
+    const csvRows = [headers.join(',')]
+    
+    for (const c of complaints) {
+      const row = [
+        c.complaint_id,
+        `"${c.text.replace(/"/g, '""')}"`, // escape quotes
+        c.category,
+        c.priority,
+        c.status,
+        c.location_block || '',
+        c.created_at,
+        c.resolved_at || ''
+      ]
+      csvRows.push(row.join(','))
+    }
+    
+    const csvData = csvRows.join('\n')
+    const blob = new Blob([csvData], { type: 'text/csv' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.setAttribute('hidden', '')
+    a.setAttribute('href', url)
+    a.setAttribute('download', `scms_complaints_${format(new Date(), 'yyyy-MM-dd')}.csv`)
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+  }
+
   if (!user) return null
 
   const STAT_CARDS = [
@@ -253,6 +285,9 @@ export default function AdminDashboard() {
             </select>
           ))}
           <button onClick={loadData} className="btn-ghost" style={{ padding: '9px 12px' }}><RefreshCw size={15} /></button>
+          <button onClick={exportCSV} className="btn-secondary" style={{ padding: '9px 12px', display: 'flex', gap: 6, fontSize: 13, alignItems: 'center' }}>
+            <Download size={15} /> Export CSV
+          </button>
           <div style={{ marginLeft: 'auto', display: 'flex', gap: 4, background: '#f1f5f9', borderRadius: 8, padding: 4 }}>
             {[{ v: 'kanban', I: LayoutGrid }, { v: 'table', I: Table2 }].map(({ v, I }) => (
               <button key={v} onClick={() => setView(v)} style={{ padding: '6px 12px', borderRadius: 6, border: 'none', cursor: 'pointer', background: view === v ? 'white' : 'transparent', color: view === v ? '#4f46e5' : '#94a3b8', display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, fontWeight: 600, boxShadow: view === v ? '0 1px 3px rgba(0,0,0,0.08)' : 'none', transition: 'all 0.15s' }}>

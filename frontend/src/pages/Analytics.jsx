@@ -8,7 +8,9 @@ import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts'
-import { Brain, RefreshCw, Download, ArrowLeft, BarChart3, AlertTriangle } from 'lucide-react'
+import { Brain, RefreshCw, Download, ArrowLeft, BarChart3, AlertTriangle, FileText } from 'lucide-react'
+import jsPDF from 'jspdf'
+import html2canvas from 'html2canvas'
 
 const CATEGORY_COLORS = {
   'Wi-Fi': '#4f46e5', 'Electrical': '#dc2626', 'Hostel': '#0f766e',
@@ -98,13 +100,25 @@ export default function Analytics() {
     a.click()
   }
 
+  const exportPDF = async () => {
+    const element = document.getElementById('analytics-dashboard')
+    if (!element) return
+    const canvas = await html2canvas(element, { scale: 2 })
+    const imgData = canvas.toDataURL('image/png')
+    const pdf = new jsPDF('p', 'mm', 'a4')
+    const pdfWidth = pdf.internal.pageSize.getWidth()
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
+    pdf.save(`SCMS_Analytics_Report_${format(new Date(), 'yyyy-MM-dd')}.pdf`)
+  }
+
   const STAT_CARDS = [
     { label: 'Total Complaints', value: overview.total, color: '#4f46e5' },
     { label: 'Open Issues', value: overview.open, color: '#d97706' },
     { label: 'Resolved', value: overview.resolved, color: '#16a34a' },
     { label: 'High Priority', value: overview.high_priority, color: '#dc2626' },
     { label: 'Resolution Rate', value: overview.resolution_rate ? `${overview.resolution_rate}%` : null, color: '#0f766e' },
-    { label: 'Avg Resolution', value: overview.avg_resolution_hours ? `${Math.round(overview.avg_resolution_hours)}h` : null, color: '#7c3aed' },
+    { label: 'Satisfaction Score', value: overview.satisfaction_score !== null ? `${overview.satisfaction_score}%` : 'N/A', color: '#be185d' },
   ]
 
   return (
@@ -120,10 +134,11 @@ export default function Analytics() {
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
           <button onClick={loadAll} className="btn-secondary" style={{ padding: '8px 14px', fontSize: 13 }}><RefreshCw size={14} /> Refresh</button>
           <button onClick={exportCSV} className="btn-secondary" style={{ padding: '8px 14px', fontSize: 13 }}><Download size={14} /> Export CSV</button>
+          <button onClick={exportPDF} className="btn-primary" style={{ padding: '8px 14px', fontSize: 13 }}><FileText size={14} /> Export PDF</button>
         </div>
       </nav>
 
-      <div style={{ maxWidth: 1300, margin: '0 auto', padding: '28px 24px' }}>
+      <div id="analytics-dashboard" style={{ maxWidth: 1300, margin: '0 auto', padding: '28px 24px', background: '#f1f5f9' }}>
         {/* Stat cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 24 }}>
           {STAT_CARDS.map(({ label, value, color }) => (

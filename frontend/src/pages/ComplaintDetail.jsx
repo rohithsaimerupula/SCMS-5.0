@@ -212,6 +212,27 @@ export default function ComplaintDetail() {
               {(!complaint.logs || complaint.logs.length === 0) && <div style={{ color: '#94a3b8', fontSize: 13 }}>No activity yet.</div>}
             </div>
           </motion.div>
+
+          {/* Feedback section */}
+          {complaint.feedback && (
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="card" style={{ padding: 28 }}>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 16 }}>
+                <div style={{ width: 36, height: 36, background: complaint.feedback.satisfied_bool ? '#f0fdf4' : '#fef2f2', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CheckCircle size={18} color={complaint.feedback.satisfied_bool ? '#16a34a' : '#dc2626'} />
+                </div>
+                <h2 style={{ fontSize: 17, fontWeight: 800, color: '#0f172a', margin: 0 }}>Student Feedback</h2>
+              </div>
+              <div style={{ padding: '16px', background: complaint.feedback.satisfied_bool ? '#f0fdf4' : '#fef2f2', border: `1px solid ${complaint.feedback.satisfied_bool ? '#bbf7d0' : '#fecaca'}`, borderRadius: 10 }}>
+                <div style={{ fontWeight: 700, color: complaint.feedback.satisfied_bool ? '#16a34a' : '#dc2626', marginBottom: 6 }}>
+                  {complaint.feedback.satisfied_bool ? 'Satisfied with resolution' : 'Not satisfied with resolution'}
+                </div>
+                {complaint.feedback.comment && (
+                  <div style={{ fontSize: 14, color: '#1e293b', marginTop: 8 }}>"{complaint.feedback.comment}"</div>
+                )}
+                <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 10 }}>{format(new Date(complaint.feedback.created_at), 'dd MMM yyyy, HH:mm')}</div>
+              </div>
+            </motion.div>
+          )}
         </div>
 
         {/* RIGHT — Actions panel */}
