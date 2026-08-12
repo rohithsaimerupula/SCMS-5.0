@@ -10,14 +10,20 @@ elif DATABASE_URL.startswith("libsql://") and not DATABASE_URL.startswith("sqlit
     DATABASE_URL = DATABASE_URL.replace("libsql://", "sqlite+libsql://", 1)
 
 connect_args = {}
-if "sqlite" in DATABASE_URL and not "libsql" in DATABASE_URL:
+# Local SQLite config
+if "sqlite" in DATABASE_URL and "libsql" not in DATABASE_URL:
     connect_args["check_same_thread"] = False
 
-# Support Turso Auth Token if provided
-TURSO_AUTH_TOKEN = os.getenv("TURSO_AUTH_TOKEN")
-if TURSO_AUTH_TOKEN and "libsql" in DATABASE_URL:
-    separator = "&" if "?" in DATABASE_URL else "?"
-    DATABASE_URL += f"{separator}authToken={TURSO_AUTH_TOKEN}"
+# Turso config
+if "libsql" in DATABASE_URL:
+    if "?" not in DATABASE_URL and not DATABASE_URL.endswith("/"):
+        DATABASE_URL += "/?secure=true"
+    elif "secure=true" not in DATABASE_URL:
+        DATABASE_URL += "&secure=true"
+        
+    TURSO_AUTH_TOKEN = os.getenv("TURSO_AUTH_TOKEN")
+    if TURSO_AUTH_TOKEN:
+        connect_args["auth_token"] = TURSO_AUTH_TOKEN
 
 engine = create_engine(
     DATABASE_URL,
@@ -25,10 +31,10 @@ engine = create_engine(
     echo=False,
 )
 
-# Enable WAL mode for SQLite (better concurrent reads)
+# Enable WAL mode for local SQLite ONLY
 @event.listens_for(engine, "connect")
 def set_sqlite_pragma(dbapi_conn, connection_record):
-    if "sqlite" in DATABASE_URL:
+    if "sqlite" in DATABASE_URL and "libsql" not in DATABASE_URL:
         cursor = dbapi_conn.cursor()
         cursor.execute("PRAGMA journal_mode=WAL")
         cursor.execute("PRAGMA foreign_keys=ON")
