@@ -22,6 +22,7 @@ def find_similar(
     candidates: List[dict],   # list of {id, complaint_id, text, embedding, ...}
     top_k: int = 3,
     threshold: float = SIMILARITY_THRESHOLD,
+    query_embedding: Optional[np.ndarray] = None,
 ) -> List[dict]:
     """
     Returns top_k most similar complaints above threshold.
@@ -30,7 +31,11 @@ def find_similar(
     if not candidates:
         return []
 
-    new_emb = embed_text(new_text).reshape(1, -1)
+    if query_embedding is not None:
+        new_emb = query_embedding.reshape(1, -1)
+    else:
+        new_emb = embed_text(new_text).reshape(1, -1)
+        
     results = []
 
     for c in candidates:

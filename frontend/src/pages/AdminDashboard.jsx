@@ -151,13 +151,18 @@ export default function AdminDashboard() {
     const t = setTimeout(async () => {
       setLoading(true)
       try {
-        const params = {}
-        if (filters.status) params.status = filters.status
-        if (filters.category) params.category = filters.category
-        if (filters.priority) params.priority = filters.priority
-        if (filters.search) params.search = filters.search
-        const res = await adminAPI.listComplaints(params)
-        setComplaints(res.data)
+        if (filters.semantic && filters.search.length > 5) {
+          const res = await adminAPI.semanticSearch(filters.search)
+          setComplaints(res.data)
+        } else {
+          const params = {}
+          if (filters.status) params.status = filters.status
+          if (filters.category) params.category = filters.category
+          if (filters.priority) params.priority = filters.priority
+          if (filters.search && !filters.semantic) params.search = filters.search
+          const res = await adminAPI.listComplaints(params)
+          setComplaints(res.data)
+        }
       } catch { }
       finally { setLoading(false) }
     }, 400)
@@ -215,11 +220,28 @@ export default function AdminDashboard() {
           ))}
         </div>
 
-        {/* Filters + View toggle */}
         <div className="card" style={{ padding: '14px 16px', marginBottom: 16, display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <div style={{ position: 'relative', flex: 2, minWidth: 200 }}>
-            <Search size={15} color="#94a3b8" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
-            <input className="input-field" placeholder="Search complaints…" value={filters.search} onChange={(e) => setFilters(f => ({ ...f, search: e.target.value }))} style={{ paddingLeft: 36, padding: '9px 12px 9px 36px' }} />
+          <div style={{ position: 'relative', flex: 2, minWidth: 200, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ position: 'relative', flex: 1 }}>
+              <Search size={15} color="#94a3b8" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
+              <input 
+                className="input-field" 
+                placeholder={filters.semantic ? "Describe the issue in natural language..." : "Search complaints…"} 
+                value={filters.search} 
+                onChange={(e) => setFilters(f => ({ ...f, search: e.target.value }))} 
+                style={{ paddingLeft: 36, padding: '9px 12px 9px 36px', width: '100%' }} 
+              />
+            </div>
+            <button 
+              onClick={() => {
+                setFilters(f => ({ ...f, semantic: !f.semantic, search: '' }))
+              }}
+              className={`btn-${filters.semantic ? 'primary' : 'secondary'}`} 
+              style={{ padding: '9px 12px', fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}
+              title="Semantic Search (AI)"
+            >
+              <Brain size={14} /> AI Search
+            </button>
           </div>
           {[
             { key: 'status', options: ['', ...STATUSES], label: 'Status' },

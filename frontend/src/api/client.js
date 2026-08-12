@@ -63,6 +63,8 @@ export const adminAPI = {
   getSimilar: (id) => api.get(`/admin/similar/${id}`),
   stats: () => api.get('/admin/stats'),
   departments: () => api.get('/admin/departments'),
+  semanticSearch: (query) => api.get('/admin/semantic-search', { params: { query } }),
+  getRCA: (id) => api.get(`/admin/complaints/${id}/rca`),
 }
 
 // ─── Analytics ────────────────────────────────────────────────────────────────

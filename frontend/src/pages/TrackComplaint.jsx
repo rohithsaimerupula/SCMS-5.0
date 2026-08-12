@@ -11,6 +11,12 @@ const STATUS_STEPS = ['Submitted', 'In Review', 'Assigned', 'In Progress', 'Reso
 const PRIORITY_COLORS = { High: '#dc2626', Medium: '#d97706', Low: '#16a34a' }
 const STATUS_ICONS = { 'Submitted': '📝', 'In Review': '🔍', 'Assigned': '👤', 'In Progress': '🔧', 'Resolved': '✅' }
 
+function getEta(priority) {
+  if (priority === 'High') return '24 hours'
+  if (priority === 'Medium') return '3-5 business days'
+  return '7-10 business days'
+}
+
 function StatusStepper({ status }) {
   const currentIdx = STATUS_STEPS.indexOf(status)
   return (
@@ -192,6 +198,7 @@ export default function TrackComplaint() {
                   complaint.location_block && { label: 'Location', value: `${complaint.location_block}${complaint.location_room ? ' — ' + complaint.location_room : ''}` },
                   { label: 'Submitted', value: format(new Date(complaint.created_at), 'dd MMM yyyy, HH:mm') },
                   complaint.assigned_to && { label: 'Assigned To', value: complaint.assigned_to },
+                  complaint.status !== 'Resolved' && complaint.status !== 'Closed' && { label: 'Estimated ETA', value: getEta(complaint.priority) },
                 ].filter(Boolean).map(({ label, value }) => (
                   <div key={label} style={{ padding: '12px 14px', background: '#f8fafc', borderRadius: 10, border: '1px solid #f1f5f9' }}>
                     <div style={{ fontSize: 11, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>{label}</div>

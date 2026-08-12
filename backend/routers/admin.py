@@ -7,8 +7,32 @@ from backend.database import get_db
 from backend import models, schemas
 from backend.auth import require_admin, get_current_user
 from backend.ai.deduplicator import find_similar
+from backend.ai.classifier import embed_text
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
+
+@router.get("/semantic-search")
+def semantic_search(
+    query: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(require_admin),
+):
+    """Perform natural language semantic search against all complaints."""
+    query_emb = embed_text(query)
+    # Fetch all complaints with embeddings
+    candidates = db.query(models.Complaint).filter(models.Complaint.embedding.isnot(None)).all()
+    
+    cands = [{"id": x.id, "complaint_id": x.complaint_id, "text": x.text,
+              "category": x.category, "location_block": x.location_block,
+              "location_room": x.location_room, "status": x.status,
+              "priority": x.priority,
+              "upvote_count": x.upvote_count, "embedding": x.embedding,
+              "created_at": x.created_at} for x in candidates]
+    
+    similar = find_similar(query, cands, query_embedding=query_emb, threshold=0.3)
+    
+    # Return top 15 results
+    return similar[:15]
 
 
 @router.get("/complaints", response_model=List[schemas.ComplaintOut])
@@ -207,6 +231,49 @@ def admin_stats(
         "ai_accuracy": accuracy,
         "override_count": overridden,
     }
+
+import google.generativeai as genai
+import os
+
+@router.get("/complaints/{complaint_id}/rca")
+def generate_rca(
+    complaint_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(require_admin),
+):
+    c = db.query(models.Complaint).filter(models.Complaint.id == complaint_id).first()
+    if not c:
+        raise HTTPException(status_code=404, detail="Not found")
+    
+    if c.status != "Resolved":
+        raise HTTPException(status_code=400, detail="RCA can only be generated for resolved complaints.")
+    
+    genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+    model = genai.GenerativeModel('gemini-1.5-flash')
+    
+    prompt = f"""
+    You are an AI Root Cause Analysis generator for a university facility management system.
+    Generate a brief (3-4 paragraphs) Root Cause Analysis (RCA) report for the following resolved complaint:
+    
+    Description: {c.text}
+    Category: {c.category}
+    Location: {c.location_block} {c.location_room or ''}
+    Priority: {c.priority}
+    Upvotes (Students affected): {c.upvote_count}
+    
+    The RCA should include:
+    1. Problem Statement
+    2. Probable Root Cause (hypothesize based on the description)
+    3. Suggested Preventive Action
+    
+    Format as plain text or simple markdown. Keep it concise.
+    """
+    
+    try:
+        response = model.generate_content(prompt)
+        return {"rca_report": response.text}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate RCA: {str(e)}")
 
 
 @router.get("/departments")

@@ -23,6 +23,8 @@ export default function ComplaintDetail() {
   const [newPriority, setNewPriority] = useState('')
   const [newNote, setNewNote] = useState('')
   const [assignTo, setAssignTo] = useState('')
+  const [rcaReport, setRcaReport] = useState(null)
+  const [generatingRCA, setGeneratingRCA] = useState(false)
 
   useEffect(() => {
     if (!user || !['admin', 'superadmin'].includes(user.role)) navigate('/admin/login')
@@ -56,6 +58,19 @@ export default function ComplaintDetail() {
       await adminAPI.mergeComplaints(parseInt(id), targetId)
       toast.success('Complaints merged!'); navigate('/admin/dashboard')
     } catch { toast.error('Merge failed') }
+  }
+
+  const handleGenerateRCA = async () => {
+    setGeneratingRCA(true)
+    try {
+      const res = await adminAPI.getRCA(id)
+      setRcaReport(res.data.rca_report)
+      toast.success('RCA Generated Successfully')
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to generate RCA')
+    } finally {
+      setGeneratingRCA(false)
+    }
   }
 
   if (loading) return (
@@ -135,6 +150,21 @@ export default function ComplaintDetail() {
               </div>
             )}
           </motion.div>
+
+          {/* RCA Report */}
+          {rcaReport && (
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="card" style={{ padding: 28 }}>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 16 }}>
+                <div style={{ width: 36, height: 36, background: '#f5f3ff', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Brain size={18} color="#7c3aed" />
+                </div>
+                <h2 style={{ fontSize: 17, fontWeight: 800, color: '#0f172a', margin: 0 }}>Root Cause Analysis</h2>
+              </div>
+              <div style={{ padding: '20px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 10, whiteSpace: 'pre-wrap', lineHeight: 1.7, color: '#1e293b', fontSize: 14 }}>
+                {rcaReport}
+              </div>
+            </motion.div>
+          )}
 
           {/* Similar complaints */}
           {similar.length > 0 && (
@@ -224,6 +254,17 @@ export default function ComplaintDetail() {
                 style={{ width: '100%', justifyContent: 'center', marginTop: 8, color: '#16a34a', fontWeight: 700 }}
               >
                 <CheckCircle size={15} color="#16a34a" /> Mark as Resolved
+              </button>
+            )}
+
+            {complaint.status === 'Resolved' && (
+              <button
+                className="btn-secondary"
+                onClick={handleGenerateRCA}
+                disabled={generatingRCA}
+                style={{ width: '100%', justifyContent: 'center', marginTop: 12, padding: '10px', borderColor: '#8b5cf6', color: '#6d28d9', background: '#f5f3ff' }}
+              >
+                {generatingRCA ? <Loader2 size={16} className="spin" /> : <><Brain size={15} /> Generate RCA Report</>}
               </button>
             )}
           </div>
